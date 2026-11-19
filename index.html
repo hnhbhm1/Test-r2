@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#050811" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="حاسبة التغير" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>نسبة التغير | الحاسبة الذكية</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Cairo & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              arabic: ['Cairo', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              cyber: {
+                bgDeep: '#050811',
+                bgCard: '#0a0e17',
+                bgSurface: '#101726',
+                cyan: '#00f2fe',
+                blue: '#00c6ff',
+                green: '#00ff9d',
+                red: '#ff3b5c',
+                orange: '#ff9900',
+              }
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-deep: #050811;
+      --bg-card: #0a0e17;
+      --neon-cyan: #00f2fe;
+      --neon-blue: #00c6ff;
+      --neon-green: #00ff9d;
+      --neon-red: #ff3b5c;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--bg-deep);
+      color: #f0f6fc;
+      min-height: 100dvh;
+      margin: 0;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(0, 198, 255, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(0, 242, 254, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .neon-title {
+      text-shadow: 0 0 12px rgba(0, 242, 254, 0.55);
+    }
+
+    .cyber-card {
+      background: linear-gradient(155deg, rgba(16, 23, 38, 0.94), rgba(10, 14, 23, 0.98));
+      border: 1px solid rgba(0, 242, 254, 0.24);
+      box-shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.75),
+                  0 0 14px rgba(0, 242, 254, 0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cyber-card:focus-within {
+      border-color: rgba(0, 242, 254, 0.55);
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.85),
+                  0 0 18px rgba(0, 242, 254, 0.14);
+    }
+
+    /* حقول الأرقام: محاذاة من اليسار لليمين لمنع الكتابة المعكوسة نهائياً */
+    .cyber-input {
+      background: rgba(5, 8, 17, 0.92);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: #ffffff;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: plaintext;
+      transition: all 0.2s ease;
+    }
+
+    .cyber-input:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.18), 0 0 12px rgba(0, 242, 254, 0.25);
+      background: #040711;
+    }
+
+    .cyber-input::placeholder {
+      color: rgba(148, 163, 184, 0.45);
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      font-size: 0.74rem;
+    }
+
+    /* حقول أسماء المنتجات والمنصات: تدعم الكتابة العربية والإنجليزية طبيعياً من اليمين لليسار */
+    .cyber-text-input {
+      background: rgba(5, 8, 17, 0.78);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: #e2e8f0;
+      direction: rtl;
+      text-align: right;
+      font-family: 'Cairo', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    .cyber-text-input:focus {
+      outline: none;
+      border-color: rgba(0, 242, 254, 0.75);
+      box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.14), 0 0 10px rgba(0, 242, 254, 0.2);
+      background: #040711;
+    }
+
+    .cyber-text-input::placeholder {
+      color: rgba(148, 163, 184, 0.48);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    /* مفتاح التبديل المدمج */
+    .toggle-checkbox:checked + .toggle-slider {
+      background: linear-gradient(90deg, #00c6ff, #00f2fe);
+      border-color: #00f2fe;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.45);
+    }
+
+    .toggle-checkbox:checked + .toggle-slider::before {
+      transform: translateX(-16px);
+      background-color: #050811;
+    }
+
+    .toggle-slider {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background-color: #161f33;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 14px;
+      height: 14px;
+      background-color: #94a3b8;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    /* أزرار الضرب والقسمة */
+    .op-btn {
+      background: rgba(5, 8, 17, 0.85);
+      border: 1px solid rgba(0, 242, 254, 0.22);
+      color: #94a3b8;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .op-btn.active {
+      background: linear-gradient(135deg, #00f2fe, #00c6ff);
+      border-color: #00f2fe;
+      color: #040814;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.38);
+      font-weight: 800;
+    }
+
+    .btn-neon-primary {
+      background: linear-gradient(135deg, #00c6ff 0%, #00f2fe 100%);
+      color: #040814;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.38);
+      transition: all 0.18s ease;
+    }
+
+    .btn-neon-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-neon-add {
+      background: linear-gradient(135deg, rgba(0, 255, 157, 0.16), rgba(0, 242, 254, 0.16));
+      border: 1px solid rgba(0, 255, 157, 0.48);
+      color: #00ff9d;
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(0, 255, 157, 0.14);
+      transition: all 0.18s ease;
+    }
+
+    .btn-neon-add:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 157, 0.26), rgba(0, 242, 254, 0.24));
+    }
+
+    .btn-neon-add:active {
+      transform: scale(0.97);
+    }
+
+    .btn-neon-swap {
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.42);
+      color: #00f2fe;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.12);
+      transition: all 0.18s ease;
+    }
+
+    .btn-neon-swap:hover {
+      background: rgba(0, 242, 254, 0.2);
+    }
+
+    .btn-neon-swap:active {
+      transform: scale(0.96);
+    }
+
+    /* حالات صندوق النتيجة */
+    .result-positive {
+      border-color: rgba(0, 255, 157, 0.5) !important;
+      box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.85), 0 0 22px rgba(0, 255, 157, 0.15) !important;
+    }
+
+    .result-negative {
+      border-color: rgba(255, 59, 92, 0.5) !important;
+      box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.85), 0 0 22px rgba(255, 59, 92, 0.15) !important;
+    }
+
+    .result-neutral {
+      border-color: rgba(0, 242, 254, 0.32) !important;
+    }
+
+    .text-glow-positive {
+      color: #00ff9d;
+      text-shadow: 0 0 16px rgba(0, 255, 157, 0.55);
+    }
+
+    .text-glow-negative {
+      color: #ff3b5c;
+      text-shadow: 0 0 16px rgba(255, 59, 92, 0.55);
+    }
+
+    .text-glow-neutral {
+      color: #00f2fe;
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.5);
+    }
+
+    .fx-disabled {
+      opacity: 0.42;
+    }
+
+    /* شريط السجل الأفقي المدمج */
+    .history-scroll::-webkit-scrollbar {
+      height: 3px;
+    }
+    .history-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 242, 254, 0.35);
+      border-radius: 999px;
+    }
+
+    /* أنماط مدمجة احتياطية لضمان عمل التصميم بالكامل بدون إنترنت (Offline Mode) */
+    body { display: flex; flex-direction: column; justify-content: space-between; min-height: 100dvh; padding: 0.5rem; }
+    main { width: 100%; max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.55rem; }
+    .grid { display: grid; }
+    .grid-cols-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .col-span-2 { grid-column: span 2 / span 2; }
+    .col-span-5 { grid-column: span 5 / span 5; }
+    .col-span-7 { grid-column: span 7 / span 7; }
+    .col-span-12 { grid-column: span 12 / span 12; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .inline-flex { display: inline-flex; }
+    .hidden { display: none !important; }
+    .items-center { align-items: center; }
+    .items-stretch { align-items: stretch; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-full { border-radius: 9999px; }
+    .w-full { width: 100%; }
+    .min-w-0 { min-width: 0; }
+    .shrink-0 { flex-shrink: 0; }
+    .relative { position: relative; }
+    .text-center { text-align: center; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  </style>
+</head>
+<body class="p-2 sm:p-4 flex flex-col justify-between min-h-[100dvh]">
+
+  <main class="w-full max-w-2xl mx-auto flex flex-col gap-2 sm:gap-3 my-auto py-1">
+
+    <!-- 1. الترويسة المدمجة (Header) -->
+    <header class="cyber-card rounded-xl px-3 py-2 flex items-center justify-between gap-2 relative overflow-hidden">
+      <div class="absolute top-0 inset-x-10 h-0.5 bg-gradient-to-r from-transparent via-cyber-cyan to-transparent shadow-[0_0_10px_#00f2fe]"></div>
+
+      <div class="flex items-center gap-1.5 min-w-0">
+        <h1 class="text-xs sm:text-lg font-black text-white neon-title truncate">
+          نسبة التغير <span class="text-cyber-cyan font-normal">|</span> الحاسبة الذكية
+        </h1>
+        <span id="offlineStatusBadge" class="shrink-0 px-1.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[9px] font-bold">
+          جاهز بدون نت ✓
+        </span>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          id="installAppBtn"
+          onclick="triggerInstallApp()"
+          class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyber-cyan/20 to-cyber-blue/20 hover:from-cyber-cyan/30 hover:to-cyber-blue/30 active:scale-95 border border-cyber-cyan/50 text-cyber-cyan text-[10px] sm:text-xs font-extrabold flex items-center gap-1 shadow-[0_0_10px_rgba(0,242,254,0.2)] transition"
+          title="تثبيت الحاسبة في الهاتف للعمل بدون إنترنت"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span id="installBtnText">تثبيت للهاتف</span>
+        </button>
+
+        <div class="hidden sm:block px-2.5 py-0.5 rounded-full bg-[#060a14] border border-cyber-cyan/35">
+          <code dir="ltr" class="font-mono text-[10px] sm:text-xs font-bold text-cyber-cyan">
+            (Vn - V1) / V1 × 100%
+          </code>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. شبكة الخانات الديناميكية (V1 الأساس + V2, V3, V4... خيارات المقارنة) -->
+    <section id="cardsGrid" class="grid grid-cols-2 gap-2 sm:gap-3">
+      <!-- يتم توليد البطاقات ديناميكياً عبر JavaScript -->
+    </section>
+
+    <!-- 3. سجل أرقام الضرب والقسمة المحفوظة (History Log) -->
+    <section class="cyber-card rounded-xl px-3 py-2 flex flex-col gap-1.5">
+      <div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+        <div class="flex items-center gap-1.5 text-slate-300 font-bold">
+          <span class="w-2 h-2 rounded-full bg-cyber-cyan"></span>
+          <span>سجل أرقام الضرب / القسمة المحفوظة:</span>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap">
+          <span class="text-[10px] text-slate-400">تطبيق على:</span>
+          <div id="historyTargets" class="flex items-center gap-1 flex-wrap">
+            <!-- يتم توليد أزرار V1, V2, V3... والكل تلقائياً -->
+          </div>
+        </div>
+      </div>
+
+      <div id="historyList" class="history-scroll flex items-center gap-1.5 overflow-x-auto pb-0.5 min-h-[26px]">
+        <!-- يتم توليد أزرار السجل هنا تلقائياً -->
+      </div>
+    </section>
+
+    <!-- 4. شريط التحكم: إضافة مقارنة + تحديث/حساب + عكس V1 ⇄ V2 -->
+    <section class="grid grid-cols-12 gap-2">
+      <button
+        type="button"
+        id="addCompareBtn"
+        onclick="addComparisonCard()"
+        class="btn-neon-add col-span-12 sm:col-span-4 py-2.5 px-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer"
+        title="إضافة خيار مقارنة جديد يُقارن تلقائياً مع الأساس V1"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span id="addCompareBtnText">إضافة خيار مقارنة (V3)</span>
+      </button>
+
+      <button
+        type="button"
+        id="calcBtn"
+        onclick="handleCalculateClick()"
+        class="btn-neon-primary col-span-7 sm:col-span-5 py-2.5 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>تحديث / حساب</span>
+      </button>
+
+      <button
+        type="button"
+        id="swapBtn"
+        onclick="swapV1V2()"
+        class="btn-neon-swap col-span-5 sm:col-span-3 py-2.5 px-2.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 cursor-pointer"
+        title="عكس الأساس V1 مكان المقارنة V2 بكامل تفاصيلها"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+          <polyline points="17 1 21 5 17 9"></polyline>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+          <polyline points="7 23 3 19 7 15"></polyline>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+        </svg>
+        <span>عكس V1 ⇄ V2</span>
+      </button>
+    </section>
+
+    <!-- 5. قسم النواتج المنفصلة لكل مقارنة مع V1 -->
+    <section class="flex flex-col gap-2">
+      <!-- ترويسة قسم النواتج وشريط الإشعارات -->
+      <div class="flex items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyber-green shadow-[0_0_8px_#00ff9d]"></span>
+          <h2 class="text-xs sm:text-sm font-extrabold text-white">نواتج المقارنة مع الأساس (V1)</h2>
+          <span id="resultsCountBadge" class="px-2 py-0.5 rounded-full bg-cyber-cyan/15 border border-cyber-cyan/35 text-cyber-cyan font-mono text-[10px] font-bold">
+            1
+          </span>
+        </div>
+        <span id="toastMsg" class="text-[11px] text-amber-400 font-bold truncate max-w-[55%]"></span>
+      </div>
+
+      <!-- حاوية بطاقات النواتج المنفصلة -->
+      <div id="resultsList" class="flex flex-col gap-2.5">
+        <!-- يتم توليد بطاقة نتيجة منفصلة لكل مقارنة (V1 -> V2, V1 -> V3, ...) -->
+      </div>
+    </section>
+
+    <!-- نافذة إرشادات تثبيت التطبيق (PWA Modal) -->
+    <div
+      id="installModal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onclick="closeInstallModal(event)"
+    >
+      <div
+        class="cyber-card rounded-2xl max-w-sm w-full p-4 space-y-3 text-right border border-cyber-cyan/50 shadow-[0_0_30px_rgba(0,242,254,0.25)]"
+        onclick="event.stopPropagation()"
+      >
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-cyber-cyan/15 border border-cyber-cyan/40 flex items-center justify-center text-cyber-cyan font-mono font-bold text-xs">
+              %
+            </span>
+            <h3 class="text-sm font-extrabold text-white">تثبيت الحاسبة كتطبيق (PWA)</h3>
+          </div>
+          <button
+            type="button"
+            onclick="closeInstallModal()"
+            class="text-slate-400 hover:text-white text-sm px-1.5"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div id="installModalBody" class="text-xs text-slate-300 space-y-2 leading-relaxed">
+          <!-- يتم تعبئة الخطوات ديناميكياً حسب نوع الجهاز -->
+        </div>
+
+        <div class="pt-1 flex items-center gap-2">
+          <button
+            type="button"
+            onclick="closeInstallModal()"
+            class="w-full py-2 px-4 rounded-xl bg-cyber-cyan/20 hover:bg-cyber-cyan/30 border border-cyber-cyan/50 text-cyber-cyan text-xs font-extrabold transition"
+          >
+            حسناً، فهمت
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // مفاتيح التخزين المحلي (مع دعم الترقية التلقائية من الإصدار السابق)
+    const STORAGE_KEY = 'smart_neon_calc_fx_v4';
+    const LEGACY_STORAGE_KEY = 'smart_neon_calc_fx_v3';
+
+    // مصنع لإنشاء بطاقة جديدة بنفس التفاصيل الكاملة
+    function createDefaultCard(rate = '552') {
+      return {
+        name: '',
+        value: '',
+        enabled: false,
+        rate: rate,
+        op: 'mul' // 'mul' أو 'div'
+      };
+    }
+
+    // حالة التطبيق المركزية
+    const state = {
+      cards: [
+        createDefaultCard('552'), // الفهرس 0: V1 الأساس
+        createDefaultCard('552')  // الفهرس 1: V2 المقارنة الأولى
+      ],
+      history: ['552'],
+      historyTarget: 0, // فهرس البطاقة (0, 1, 2...) أو 'all'
+      lastCopiedNum: '',
+      lastEffectivePure: [], // تخزين الناتج الفعلي الصافي لكل بطاقة للنسخ السريع
+      lastResultPercent: []  // تخزين النسبة المئوية الصافية لكل مقارنة للنسخ السريع
+    };
+
+    const els = {
+      cardsGrid: document.getElementById('cardsGrid'),
+      historyTargets: document.getElementById('historyTargets'),
+      historyList: document.getElementById('historyList'),
+      addCompareBtnText: document.getElementById('addCompareBtnText'),
+      resultsCountBadge: document.getElementById('resultsCountBadge'),
+      resultsList: document.getElementById('resultsList'),
+      toastMsg: document.getElementById('toastMsg')
+    };
+
+    // ==========================================
+    // أدوات مساعدة لتنظيف النصوص والأرقام والأمان
+    // ==========================================
+    function escapeHTML(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // تحويل الأرقام العربية والفارسية إلى إنجليزية
+    function convertArabicPersianDigits(raw) {
+      if (!raw) return '';
+      const ar = '٠١٢٣٤٥٦٧٨٩';
+      const fa = '۰۱۲۳۴۵۶۷۸۹';
+      return String(raw)
+        .replace(/[٠-٩]/g, d => ar.indexOf(d))
+        .replace(/[۰-۹]/g, d => fa.indexOf(d))
+        .replace(/٫/g, '.');
+    }
+
+    // استخراج الرقم الصافي من أي نص يحتوي كلمات أو عملات
+    function extractValidNumberString(raw) {
+      if (!raw) return '';
+      let s = convertArabicPersianDigits(raw);
+
+      // إزالة فواصل الآلاف بين الأرقام
+      s = s.replace(/(\d)[,،٬\s]+(?=\d{3}(?:\D|$))/g, '$1');
+
+      // تحويل الفاصلة العشرية إلى نقطة إذا لم توجد نقطة
+      if (!s.includes('.') && /\d[,،]\d{1,4}(?!\d)/.test(s)) {
+        s = s.replace(/(\d)[,،](\d{1,4})(?!\d)/, '$1.$2');
+      }
+
+      // إزالة الفواصل المتبقية
+      s = s.replace(/[,،٬]/g, '');
+
+      const matches = s.match(/-?\d+(?:\.\d+)?/g);
+      if (!matches || matches.length === 0) return '';
+
+      const decimalNum = matches.find(m => m.includes('.'));
+      return decimalNum ? decimalNum.replace(/^-/, '') : matches[0].replace(/^-/, '');
+    }
+
+    // تنظيف حقول الأرقام أثناء الكتابة أو اللصق
+    function sanitizeFieldInput(raw) {
+      if (!raw) return '';
+      const converted = convertArabicPersianDigits(raw);
+
+      // إذا احتوى النص على حروف أو رموز عملات نستخرج الرقم الصافي فوراً
+      if (/[^\d.\-\s,،٬]/.test(converted)) {
+        return extractValidNumberString(converted);
+      }
+
+      // أثناء الكتابة اليدوية العادية نحافظ على النقطة العشرية لإكمال الرقم
+      let clean = converted.replace(/[,،٬\s]/g, '');
+      const parts = clean.split('.');
+      if (parts.length > 2) {
+        clean = parts[0] + '.' + parts.slice(1).join('');
+      }
+      return clean.replace(/[^0-9.]/g, '');
+    }
+
+    function parseNum(raw) {
+      const s = extractValidNumberString(raw);
+      if (!s || s === '-' || s === '.') return NaN;
+      return parseFloat(s);
+    }
+
+    // تنسيق الرقم للعرض مع فواصل الآلاف
+    function formatNum(num) {
+      if (!Number.isFinite(num)) return '0';
+      return Number(num.toFixed(4)).toLocaleString('en-US', {
+        maximumFractionDigits: 4
+      });
+    }
+
+    // تنسيق الرقم الصافي للنسخ بدون فواصل آلاف ومقرب حتى 4 منازل عشرية
+    function formatPureNumber(num) {
+      if (!Number.isFinite(num)) return '0';
+      return String(Number(num.toFixed(4)));
+    }
+
+    function forceCursorToEnd(inputEl) {
+      try {
+        const len = inputEl.value.length;
+        inputEl.setSelectionRange(len, len);
+      } catch (e) {}
+    }
+
+    function showToast(msg, duration = 2200) {
+      els.toastMsg.textContent = msg;
+      clearTimeout(showToast.timer);
+      if (msg) {
+        showToast.timer = setTimeout(() => {
+          els.toastMsg.textContent = '';
+        }, duration);
+      }
+    }
+
+    // دالة نسخ عامة موثوقة داخل المتصفح وإطارات المعاينة (iFrames)
+    function copyTextToClipboard(text, onSuccess) {
+      const str = String(text);
+      state.lastCopiedNum = str;
+
+      const temp = document.createElement('textarea');
+      temp.value = str;
+      temp.setAttribute('readonly', '');
+      temp.style.position = 'fixed';
+      temp.style.top = '-9999px';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.focus();
+      temp.select();
+
+      let copiedFallback = false;
+      try {
+        copiedFallback = document.execCommand('copy');
+      } catch (e) {
+        copiedFallback = false;
+      } finally {
+        document.body.removeChild(temp);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(str)
+          .then(() => { if (onSuccess) onSuccess(); })
+          .catch(() => { if (copiedFallback && onSuccess) onSuccess(); });
+      } else if (copiedFallback && onSuccess) {
+        onSuccess();
+      }
+    }
+
+    // ==========================================
+    // التخزين المحلي واسترجاع البيانات
+    // ==========================================
+    function loadSavedSettings() {
+      try {
+        const rawV4 = localStorage.getItem(STORAGE_KEY);
+        if (rawV4) {
+          const parsed = JSON.parse(rawV4);
+          if (Array.isArray(parsed.cards) && parsed.cards.length >= 2) {
+            state.cards = parsed.cards.map(c => ({
+              name: typeof c.name === 'string' ? c.name : '',
+              value: typeof c.value === 'string' ? c.value : '',
+              enabled: !!c.enabled,
+              rate: typeof c.rate === 'string' && c.rate !== '' ? c.rate : '552',
+              op: c.op === 'div' ? 'div' : 'mul'
+            }));
+          }
+          if (Array.isArray(parsed.history) && parsed.history.length > 0) {
+            state.history = parsed.history;
+          }
+          if (parsed.historyTarget === 'all' || (typeof parsed.historyTarget === 'number' && parsed.historyTarget >= 0 && parsed.historyTarget < state.cards.length)) {
+            state.historyTarget = parsed.historyTarget;
+          }
+        } else {
+          // ترحيل الإعدادات تلقائياً من الإصدار السابق إن وجدت
+          const rawV3 = localStorage.getItem(LEGACY_STORAGE_KEY);
+          if (rawV3) {
+            const old = JSON.parse(rawV3);
+            if (old.box1) Object.assign(state.cards[0], old.box1);
+            if (old.box2) Object.assign(state.cards[1], old.box2);
+            if (Array.isArray(old.history) && old.history.length > 0) {
+              state.history = old.history;
+            }
+          }
+        }
+      } catch (e) {}
+
+      renderCards();
+      renderHistoryTargets();
+      renderHistory();
+      updateAddButtonLabel();
+      calculateAll();
+    }
+
+    function persistState(flashCardIdx = null) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          cards: state.cards,
+          history: state.history,
+          historyTarget: state.historyTarget
+        }));
+
+        if (flashCardIdx !== null && flashCardIdx >= 0) {
+          const tag = document.getElementById(`saveTag_${flashCardIdx}`);
+          if (tag) {
+            tag.classList.remove('opacity-0');
+            tag.classList.add('opacity-100');
+            clearTimeout(tag._timer);
+            tag._timer = setTimeout(() => {
+              tag.classList.remove('opacity-100');
+              tag.classList.add('opacity-0');
+            }, 900);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // ==========================================
+    // توليد وبناء بطاقات الإدخال (V1, V2, V3...)
+    // ==========================================
+    function updateAddButtonLabel() {
+      const nextNum = state.cards.length + 1;
+      els.addCompareBtnText.textContent = `إضافة خيار مقارنة (V${nextNum})`;
+    }
+
+    function renderCards() {
+      const total = state.cards.length;
+
+      els.cardsGrid.innerHTML = state.cards.map((card, idx) => {
+        const vNum = idx + 1;
+        const isBase = idx === 0;
+        const canDelete = idx >= 2;
+        // إذا كان عدد البطاقات فردياً تأخذ البطاقة الأخيرة عرض الصف كاملاً لتوازن متناسق
+        const spanClass = (idx === total - 1 && total % 2 === 1) ? 'col-span-2' : '';
+
+        const badgeBg = isBase
+          ? 'bg-cyber-cyan/15 border-cyber-cyan/45 text-cyber-cyan'
+          : (idx === 1
+              ? 'bg-cyber-blue/15 border-cyber-blue/45 text-cyber-cyan'
+              : 'bg-emerald-500/15 border-emerald-400/45 text-emerald-300');
+
+        const titleLabel = isBase ? 'الأساس' : 'المقارنة';
+        const namePlaceholder = isBase
+          ? 'اسم المنتج / الأساس (مثلاً: سعر المورد)'
+          : 'اسم المقارنة (مثلاً: المنصة)';
+
+        return `
+          <div id="card_${idx}" class="cyber-card ${spanClass} rounded-xl p-2.5 sm:p-3.5 flex flex-col justify-between gap-2">
+            <!-- رأس الخانة + زر اللصق + زر الحذف للخيارات الإضافية -->
+            <div class="flex items-center justify-between gap-1">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-6 h-6 rounded-md ${badgeBg} border flex items-center justify-center font-mono font-bold text-xs shrink-0">
+                  V${vNum}
+                </span>
+                <h2 class="text-xs sm:text-sm font-extrabold text-white truncate">${titleLabel}</h2>
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  id="pasteBtn_${idx}"
+                  onclick="handleSmartPaste(${idx}, 'pasteBtn_${idx}')"
+                  class="px-2 sm:px-2.5 py-1 rounded-lg bg-cyber-cyan/15 hover:bg-cyber-cyan/25 active:scale-95 border border-cyber-cyan/45 text-cyber-cyan text-[10px] sm:text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                  title="لصق الرقم مباشرة من الحافظة"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                  </svg>
+                  <span>لصق</span>
+                </button>
+
+                ${canDelete ? `
+                  <button
+                    type="button"
+                    onclick="removeComparisonCard(${idx})"
+                    title="حذف خيار المقارنة V${vNum}"
+                    class="w-6 h-6 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 active:scale-95 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center justify-center transition cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- حقل اسم المنتج أو اسم المقارنة/المنصة (نص عربي/إنجليزي حر) -->
+            <div class="relative">
+              <input
+                id="name_${idx}"
+                type="text"
+                dir="rtl"
+                data-type="text"
+                data-idx="${idx}"
+                value="${escapeHTML(card.name)}"
+                placeholder="${namePlaceholder}"
+                autocomplete="off"
+                class="cyber-text-input w-full rounded-lg py-1.5 pr-2.5 pl-6 text-xs font-bold"
+              />
+              <button
+                type="button"
+                onclick="clearNameField(${idx})"
+                title="مسح الاسم"
+                class="absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 text-[10px] px-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- حقل الإدخال الرقمي (من اليسار لليمين لمنع انعكاس الأرقام) -->
+            <div class="relative">
+              <input
+                id="val_${idx}"
+                type="text"
+                inputmode="decimal"
+                dir="ltr"
+                data-type="numeric"
+                data-field="value"
+                data-idx="${idx}"
+                value="${escapeHTML(card.value)}"
+                placeholder="0.00"
+                autocomplete="off"
+                class="cyber-input w-full rounded-lg py-2 pl-2.5 pr-7 text-base sm:text-lg font-mono font-extrabold"
+              />
+              <button
+                type="button"
+                onclick="clearValueField(${idx})"
+                title="مسح الرقم"
+                class="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200 text-xs px-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- قسم المصارفة للبطاقة -->
+            <div id="fxBox_${idx}" class="rounded-lg bg-[#050812] border ${card.enabled ? 'border-cyber-cyan/40' : 'border-slate-800/90'} p-2 space-y-1.5 transition-colors">
+              <div class="flex items-center justify-between">
+                <label for="fxToggle_${idx}" class="text-[11px] font-bold text-slate-300 cursor-pointer select-none flex items-center gap-1">
+                  <span>مصارفة</span>
+                  <span id="saveTag_${idx}" class="text-[9px] text-emerald-400 opacity-0 transition-opacity">✓</span>
+                </label>
+                <div>
+                  <input
+                    type="checkbox"
+                    id="fxToggle_${idx}"
+                    data-idx="${idx}"
+                    ${card.enabled ? 'checked' : ''}
+                    class="toggle-checkbox sr-only"
+                  />
+                  <label for="fxToggle_${idx}" class="toggle-slider block"></label>
+                </div>
+              </div>
+
+              <!-- إدخال سعر الصرف + زر حفظ + أزرار ضرب/قسمة -->
+              <div id="fxControls_${idx}" class="space-y-1.5 transition-opacity ${card.enabled ? '' : 'fx-disabled'}">
+                <div class="flex items-stretch gap-1">
+                  <input
+                    id="fxRate_${idx}"
+                    type="text"
+                    inputmode="decimal"
+                    dir="ltr"
+                    data-type="numeric"
+                    data-field="rate"
+                    data-idx="${idx}"
+                    placeholder="552"
+                    value="${escapeHTML(card.rate)}"
+                    class="cyber-input w-full min-w-0 rounded-md py-1 px-2 text-xs sm:text-sm font-mono font-bold"
+                  />
+                  <button
+                    type="button"
+                    onclick="saveRateToHistory(${idx})"
+                    title="حفظ الرقم في السجل"
+                    class="shrink-0 px-2 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 active:scale-95 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold transition cursor-pointer"
+                  >
+                    حفظ+
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1">
+                  <button
+                    type="button"
+                    id="opMul_${idx}"
+                    onclick="setBoxOp(${idx}, 'mul')"
+                    class="op-btn ${card.op === 'mul' ? 'active' : ''} rounded-md py-1 text-[11px] font-bold flex items-center justify-center gap-1"
+                  >
+                    <span>ضرب</span>
+                    <span class="font-mono">×</span>
+                  </button>
+                  <button
+                    type="button"
+                    id="opDiv_${idx}"
+                    onclick="setBoxOp(${idx}, 'div')"
+                    class="op-btn ${card.op === 'div' ? 'active' : ''} rounded-md py-1 text-[11px] font-bold flex items-center justify-center gap-1"
+                  >
+                    <span>قسمة</span>
+                    <span class="font-mono">÷</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- شارة الناتج الفعلي + زر نسخ الناتج الفعلي -->
+              <div class="pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-1 text-[10px] sm:text-xs">
+                <div class="flex items-center gap-1 min-w-0">
+                  <span class="text-slate-400 shrink-0">الفعلي:</span>
+                  <span id="effBadge_${idx}" dir="ltr" class="font-mono font-bold text-cyber-cyan truncate">
+                    0
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  id="copyEffBtn_${idx}"
+                  onclick="copyEffectiveValue(${idx})"
+                  title="نسخ الرقم الفعلي الصافي"
+                  class="shrink-0 px-2 py-0.5 rounded-md bg-cyber-cyan/12 hover:bg-cyber-cyan/25 active:scale-95 border border-cyber-cyan/35 text-cyber-cyan text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>نسخ</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      attachCardListeners();
+    }
+
+    // ربط الأحداث لكل بطاقة بعد التوليد
+    function attachCardListeners() {
+      state.cards.forEach((_, idx) => {
+        const nameEl = document.getElementById(`name_${idx}`);
+        const valEl = document.getElementById(`val_${idx}`);
+        const rateEl = document.getElementById(`fxRate_${idx}`);
+        const toggleEl = document.getElementById(`fxToggle_${idx}`);
+
+        // 1. حقل الاسم النصي (بدون أي فلترة للأرقام)
+        if (nameEl) {
+          nameEl.addEventListener('input', () => {
+            state.cards[idx].name = nameEl.value;
+            persistState();
+            calculateAll();
+          });
+        }
+
+        // 2. حقل القيمة الرقمية
+        if (valEl) {
+          valEl.addEventListener('focus', () => {
+            activePasteInputId = `val_${idx}`;
+            setHistoryTarget(idx);
+            setTimeout(() => forceCursorToEnd(valEl), 0);
+          });
+
+          valEl.addEventListener('click', () => {
+            if (valEl.selectionStart === valEl.selectionEnd) {
+              forceCursorToEnd(valEl);
+            }
+          });
+
+          valEl.addEventListener('input', () => {
+            const cleaned = sanitizeFieldInput(valEl.value);
+            if (cleaned !== valEl.value) {
+              valEl.value = cleaned;
+              forceCursorToEnd(valEl);
+            }
+            state.cards[idx].value = valEl.value;
+            persistState();
+            calculateAll();
+          });
+        }
+
+        // 3. حقل قيمة المصارفة
+        if (rateEl) {
+          rateEl.addEventListener('focus', () => {
+            activePasteInputId = `fxRate_${idx}`;
+            setHistoryTarget(idx);
+            setTimeout(() => forceCursorToEnd(rateEl), 0);
+          });
+
+          rateEl.addEventListener('click', () => {
+            if (rateEl.selectionStart === rateEl.selectionEnd) {
+              forceCursorToEnd(rateEl);
+            }
+          });
+
+          rateEl.addEventListener('input', () => {
+            const cleaned = sanitizeFieldInput(rateEl.value);
+            if (cleaned !== rateEl.value) {
+              rateEl.value = cleaned;
+              forceCursorToEnd(rateEl);
+            }
+            state.cards[idx].rate = rateEl.value;
+            persistState(idx);
+            calculateAll();
+          });
+
+          rateEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') saveRateToHistory(idx);
+          });
+        }
+
+        // 4. مفتاح تفعيل/إيقاف المصارفة
+        if (toggleEl) {
+          toggleEl.addEventListener('change', () => {
+            state.cards[idx].enabled = toggleEl.checked;
+            syncCardFxUI(idx);
+            persistState(idx);
+            calculateAll();
+          });
+        }
+      });
+    }
+
+    function syncCardFxUI(idx) {
+      const card = state.cards[idx];
+      if (!card) return;
+      const fxBox = document.getElementById(`fxBox_${idx}`);
+      const fxControls = document.getElementById(`fxControls_${idx}`);
+      const opMul = document.getElementById(`opMul_${idx}`);
+      const opDiv = document.getElementById(`opDiv_${idx}`);
+      const toggle = document.getElementById(`fxToggle_${idx}`);
+      const rateEl = document.getElementById(`fxRate_${idx}`);
+
+      if (toggle) toggle.checked = !!card.enabled;
+      if (rateEl && rateEl.value !== card.rate) rateEl.value = card.rate;
+      if (fxControls) fxControls.classList.toggle('fx-disabled', !card.enabled);
+      if (fxBox) {
+        fxBox.classList.toggle('border-cyber-cyan/40', !!card.enabled);
+        fxBox.classList.toggle('border-slate-800/90', !card.enabled);
+      }
+      if (opMul) opMul.classList.toggle('active', card.op === 'mul');
+      if (opDiv) opDiv.classList.toggle('active', card.op === 'div');
+    }
+
+    function setBoxOp(idx, op) {
+      if (!state.cards[idx]) return;
+      state.cards[idx].op = op;
+      syncCardFxUI(idx);
+      persistState(idx);
+      calculateAll();
+    }
+
+    function clearValueField(idx) {
+      if (!state.cards[idx]) return;
+      state.cards[idx].value = '';
+      const el = document.getElementById(`val_${idx}`);
+      if (el) {
+        el.value = '';
+        el.focus();
+      }
+      persistState();
+      calculateAll();
+    }
+
+    function clearNameField(idx) {
+      if (!state.cards[idx]) return;
+      state.cards[idx].name = '';
+      const el = document.getElementById(`name_${idx}`);
+      if (el) {
+        el.value = '';
+        el.focus();
+      }
+      persistState();
+      calculateAll();
+    }
+
+    // إضافة خيار مقارنة جديد (V3, V4, V5...)
+    function addComparisonCard() {
+      const defaultRate = state.history[0] || '552';
+      state.cards.push(createDefaultCard(defaultRate));
+      const newIdx = state.cards.length - 1;
+
+      renderCards();
+      renderHistoryTargets();
+      updateAddButtonLabel();
+      persistState();
+      calculateAll();
+
+      showToast(`تمت إضافة خيار المقارنة V${newIdx + 1} ✓`, 1600);
+
+      // تمرير سلس لإظهار البطاقة الجديدة
+      const newCardEl = document.getElementById(`card_${newIdx}`);
+      if (newCardEl) {
+        newCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // حذف خيار مقارنة إضافي (V3 فأعلى) مع إعادة الترقيم بسلاسة
+    function removeComparisonCard(idx) {
+      if (idx < 2 || idx >= state.cards.length) return;
+      const removedLabel = `V${idx + 1}`;
+      state.cards.splice(idx, 1);
+
+      if (state.historyTarget === idx) {
+        state.historyTarget = 0;
+      } else if (typeof state.historyTarget === 'number' && state.historyTarget > idx) {
+        state.historyTarget -= 1;
+      }
+
+      renderCards();
+      renderHistoryTargets();
+      updateAddButtonLabel();
+      persistState();
+      calculateAll();
+      showToast(`تم حذف ${removedLabel} وتحديث الترقيم ✓`, 1500);
+    }
+
+    // عكس الأساس V1 مكان المقارنة V2 (القيمة + الاسم + إعدادات المصارفة)
+    function swapV1V2() {
+      if (state.cards.length < 2) return;
+      const temp = { ...state.cards[0] };
+      state.cards[0] = { ...state.cards[1] };
+      state.cards[1] = temp;
+
+      renderCards();
+      persistState();
+      calculateAll();
+      showToast('تم عكس V1 ⇄ V2 ✓', 1300);
+    }
+
+    // ==========================================
+    // سجل أرقام المصارفة المحفوظة وتطبيقها ديناميكياً
+    // ==========================================
+    function addNumberToHistory(rawRate) {
+      const cleaned = extractValidNumberString(rawRate);
+      if (!cleaned || Number.isNaN(parseFloat(cleaned)) || parseFloat(cleaned) === 0) return false;
+
+      state.history = [cleaned, ...state.history.filter(item => item !== cleaned)].slice(0, 12);
+      persistState();
+      renderHistory();
+      return true;
+    }
+
+    function saveRateToHistory(idx) {
+      const inputEl = document.getElementById(`fxRate_${idx}`);
+      if (!inputEl) return;
+      const ok = addNumberToHistory(inputEl.value);
+      if (ok) {
+        showToast(`تم حفظ الرقم (${extractValidNumberString(inputEl.value)}) في السجل ✓`, 1600);
+      } else {
+        showToast('أدخل رقم صرف صالح لحفظه في السجل');
+      }
+    }
+
+    function deleteFromHistory(rateStr, event) {
+      event.stopPropagation();
+      state.history = state.history.filter(item => item !== rateStr);
+      persistState();
+      renderHistory();
+    }
+
+    function setHistoryTarget(target) {
+      state.historyTarget = target;
+      renderHistoryTargets();
+      persistState();
+    }
+
+    function renderHistoryTargets() {
+      const activeMono = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyber-cyan text-[#040814] cursor-pointer transition';
+      const inactiveMono = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer transition';
+      const activeAll = 'px-2 py-0.5 rounded text-[10px] font-bold bg-cyber-cyan text-[#040814] cursor-pointer transition';
+      const inactiveAll = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer transition';
+
+      const cardBtns = state.cards.map((_, idx) => `
+        <button
+          type="button"
+          onclick="setHistoryTarget(${idx})"
+          class="${state.historyTarget === idx ? activeMono : inactiveMono}"
+        >
+          V${idx + 1}
+        </button>
+      `).join('');
+
+      const allBtn = `
+        <button
+          type="button"
+          onclick="setHistoryTarget('all')"
+          class="${state.historyTarget === 'all' ? activeAll : inactiveAll}"
+        >
+          الكل
+        </button>
+      `;
+
+      els.historyTargets.innerHTML = cardBtns + allBtn;
+    }
+
+    function applyHistoryRate(rateStr) {
+      if (state.historyTarget === 'all') {
+        state.cards.forEach((card, idx) => {
+          card.rate = rateStr;
+          card.enabled = true;
+          syncCardFxUI(idx);
+        });
+        showToast(`تم تطبيق ${rateStr} على جميع الخانات ✓`, 1300);
+      } else if (typeof state.historyTarget === 'number' && state.cards[state.historyTarget]) {
+        const idx = state.historyTarget;
+        state.cards[idx].rate = rateStr;
+        state.cards[idx].enabled = true;
+        syncCardFxUI(idx);
+        showToast(`تم تطبيق ${rateStr} على V${idx + 1} ✓`, 1300);
+      }
+      persistState();
+      calculateAll();
+    }
+
+    function renderHistory() {
+      if (!state.history.length) {
+        els.historyList.innerHTML = `<span class="text-[11px] text-slate-500">لا توجد أرقام محفوظة بعد — اضغط "حفظ+" لإضافة رقم.</span>`;
+        return;
+      }
+
+      els.historyList.innerHTML = state.history.map(rate => `
+        <div
+          onclick="applyHistoryRate('${escapeHTML(rate)}')"
+          class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#060b16] hover:bg-cyber-cyan/15 border border-cyber-cyan/35 text-cyber-cyan text-xs font-mono font-bold cursor-pointer active:scale-95 transition select-none"
+        >
+          <span>${escapeHTML(rate)}</span>
+          <button
+            type="button"
+            onclick="deleteFromHistory('${escapeHTML(rate)}', event)"
+            class="text-slate-500 hover:text-rose-400 text-[10px] leading-none px-0.5 cursor-pointer"
+            title="حذف من السجل"
+          >✕</button>
+        </div>
+      `).join('');
+    }
+
+    // ==========================================
+    // اللصق الذكي (مقيد بحقول الأرقام فقط ولا يعيق حقول الأسماء)
+    // ==========================================
+    let activePasteInputId = 'val_0';
+
+    async function handleSmartPaste(idx, btnId) {
+      const inputId = `val_${idx}`;
+      activePasteInputId = inputId;
+      const inputEl = document.getElementById(inputId);
+      const btnEl = document.getElementById(btnId);
+      if (!inputEl) return;
+
+      // تركيز فوري لفتح الكيبورد وشريط الحافظة على الهاتف
+      inputEl.focus();
+      forceCursorToEnd(inputEl);
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const clipText = await navigator.clipboard.readText();
+          const cleaned = extractValidNumberString(clipText);
+          if (cleaned) {
+            inputEl.value = cleaned;
+            state.cards[idx].value = cleaned;
+            forceCursorToEnd(inputEl);
+            persistState();
+            calculateAll();
+            if (btnEl) {
+              const oldHTML = btnEl.innerHTML;
+              btnEl.innerHTML = '<span>تم ✓</span>';
+              setTimeout(() => { btnEl.innerHTML = oldHTML; }, 900);
+            }
+            return;
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const pasted = document.execCommand('paste');
+        if (pasted) return;
+      } catch (e) {}
+
+      if (state.lastCopiedNum) {
+        const cleaned = extractValidNumberString(state.lastCopiedNum);
+        if (cleaned) {
+          inputEl.value = cleaned;
+          state.cards[idx].value = cleaned;
+          forceCursorToEnd(inputEl);
+          persistState();
+          calculateAll();
+          showToast('تم اللصق ✓', 1200);
+          return;
+        }
+      }
+
+      inputEl.select();
+      showToast('الحقل جاهز — اختر الرقم من شريط الحافظة أو Ctrl+V', 2500);
+    }
+
+    // التقاط حدث اللصق العام: يترك حقول الأسماء تعمل طبيعياً ويعالج حقول الأرقام فقط
+    window.addEventListener('paste', (e) => {
+      const target = document.activeElement;
+
+      // السماح باللصق النصي الطبيعي في حقول اسم المنتج واسم المقارنة بدون أي تدخل
+      if (target && target.dataset && target.dataset.type === 'text') {
+        return;
+      }
+
+      const isNumericTarget = target && target.dataset && target.dataset.type === 'numeric';
+      const destInput = isNumericTarget ? target : document.getElementById(activePasteInputId || 'val_0');
+      if (!destInput || destInput.dataset.type !== 'numeric') return;
+
+      const raw = (e.clipboardData || window.clipboardData).getData('text');
+      const cleaned = extractValidNumberString(raw);
+      if (cleaned) {
+        e.preventDefault();
+        destInput.value = cleaned;
+        forceCursorToEnd(destInput);
+        state.lastCopiedNum = cleaned;
+
+        const idx = Number(destInput.dataset.idx);
+        const field = destInput.dataset.field;
+        if (!Number.isNaN(idx) && state.cards[idx]) {
+          if (field === 'value') {
+            state.cards[idx].value = cleaned;
+          } else if (field === 'rate') {
+            state.cards[idx].rate = cleaned;
+            addNumberToHistory(cleaned);
+          }
+        }
+        persistState();
+        calculateAll();
+        showToast('تم اللصق بنجاح ✓', 1200);
+      }
+    });
+
+    // ==========================================
+    // الحساب الفوري وتوليد بطاقة نتيجة منفصلة لكل مقارنة
+    // ==========================================
+    function computeEffective(card) {
+      const base = parseNum(card.value);
+      if (Number.isNaN(base)) return { valid: false, value: NaN };
+
+      if (!card.enabled) {
+        return { valid: true, value: base };
+      }
+
+      const rate = parseNum(card.rate);
+      if (Number.isNaN(rate) || rate === 0) {
+        return { valid: false, error: 'سعر الصرف لا يمكن أن يكون صفراً' };
+      }
+
+      const value = card.op === 'mul' ? base * rate : base / rate;
+      return { valid: true, value };
+    }
+
+    function handleCalculateClick() {
+      // حفظ أرقام الصرف النشطة في السجل تلقائياً عند الضغط على تحديث/حساب
+      state.cards.forEach(card => {
+        if (card.enabled && card.rate) addNumberToHistory(card.rate);
+      });
+      calculateAll();
+      showToast('تم التحديث والحساب ✓', 1100);
+    }
+
+    function getDisplayLabel(idx) {
+      const vTag = `V${idx + 1}`;
+      const customName = (state.cards[idx]?.name || '').trim();
+      if (customName) {
+        return `${vTag} (${escapeHTML(customName)})`;
+      }
+      return idx === 0 ? `${vTag} الأساس` : `${vTag} المقارنة`;
+    }
+
+    function getShortName(idx) {
+      const customName = (state.cards[idx]?.name || '').trim();
+      return customName ? escapeHTML(customName) : `V${idx + 1}`;
+    }
+
+    function calculateAll() {
+      // 1. حساب وتحديث الناتج الفعلي لكل بطاقة
+      const effectiveList = state.cards.map((card, idx) => {
+        const res = computeEffective(card);
+        const effBadge = document.getElementById(`effBadge_${idx}`);
+        if (effBadge) {
+          effBadge.textContent = res.valid ? formatNum(res.value) : '0';
+        }
+        state.lastEffectivePure[idx] = res.valid ? formatPureNumber(res.value) : '0';
+        return res;
+      });
+
+      const baseRes = effectiveList[0];
+      const baseLabel = getDisplayLabel(0);
+      const baseShort = getShortName(0);
+
+      // تحديث شارة عدد المقارنات
+      const totalComparisons = Math.max(0, state.cards.length - 1);
+      els.resultsCountBadge.textContent = `${totalComparisons}`;
+
+      // 2. توليد بطاقة نتيجة منفصلة لكل خيار مقارنة (V2, V3, V4...) مقابل V1
+      const resultsHTML = [];
+
+      for (let i = 1; i < state.cards.length; i++) {
+        const cmpRes = effectiveList[i];
+        const cmpLabel = getDisplayLabel(i);
+        const cmpShort = getShortName(i);
+        const vNum = i + 1;
+
+        let cardStatusClass = 'result-neutral';
+        let percentGlowClass = 'text-glow-neutral';
+        let percentDisplay = '0.00%';
+        let purePercentForCopy = '0.00';
+        let analysisHTML = `أدخل قيمتي <strong class="text-cyber-cyan">${baseLabel}</strong> و <strong class="text-cyber-cyan">${cmpLabel}</strong> لعرض تفاصيل المقارنة الفورية.`;
+
+        if (baseRes.error || cmpRes.error) {
+          analysisHTML = `<span class="text-amber-300">تحقق من رقم المصارفة (الضرب / القسمة) في ${baseRes.error ? 'V1' : `V${vNum}`}.</span>`;
+        } else if (baseRes.valid && cmpRes.valid) {
+          const v1 = baseRes.value;
+          const vn = cmpRes.value;
+
+          if (v1 === 0) {
+            if (vn === 0) {
+              analysisHTML = `القيمتان متطابقتان عند الصفر (<span dir="ltr" class="font-mono text-cyber-cyan font-bold">0</span>).`;
+            } else {
+              analysisHTML = `<span class="text-amber-300">لا يمكن القسمة على صفر — القيمة المرجعية (${baseLabel}) تساوي صفراً.</span>`;
+            }
+          } else {
+            const diff = vn - v1;
+            const percent = (diff / Math.abs(v1)) * 100;
+            const absPercent = Math.abs(percent).toFixed(2);
+            const diffSign = diff > 0 ? '+' : (diff < 0 ? '-' : '');
+            const diffFormatted = `${diffSign}${formatNum(Math.abs(diff))}`;
+            purePercentForCopy = absPercent;
+
+            if (percent > 0) {
+              cardStatusClass = 'result-positive';
+              percentGlowClass = 'text-glow-positive';
+              percentDisplay = `+${absPercent}%`;
+              analysisHTML = `
+                ارتفاع بـ <strong dir="ltr" class="font-mono text-cyber-green">${absPercent}%</strong>
+                (${cmpShort} مقارنة بـ ${baseShort})
+                <span class="mx-1 text-slate-500">|</span>
+                <span dir="ltr" class="font-mono text-cyber-cyan font-bold">${formatNum(v1)}</span>
+                ➔
+                <span dir="ltr" class="font-mono text-cyber-green font-bold">${formatNum(vn)}</span>
+                <span class="mx-1 text-slate-500">|</span>
+                الفرق: <strong dir="ltr" class="font-mono text-cyber-green">${diffFormatted}</strong>
+              `;
+            } else if (percent < 0) {
+              cardStatusClass = 'result-negative';
+              percentGlowClass = 'text-glow-negative';
+              percentDisplay = `-${absPercent}%`;
+              analysisHTML = `
+                انخفاض بـ <strong dir="ltr" class="font-mono text-cyber-red">${absPercent}%</strong>
+                (${cmpShort} مقارنة بـ ${baseShort})
+                <span class="mx-1 text-slate-500">|</span>
+                <span dir="ltr" class="font-mono text-cyber-cyan font-bold">${formatNum(v1)}</span>
+                ➔
+                <span dir="ltr" class="font-mono text-cyber-red font-bold">${formatNum(vn)}</span>
+                <span class="mx-1 text-slate-500">|</span>
+                الفرق: <strong dir="ltr" class="font-mono text-cyber-red">${diffFormatted}</strong>
+              `;
+            } else {
+              cardStatusClass = 'result-neutral';
+              percentGlowClass = 'text-glow-neutral';
+              percentDisplay = '0.00%';
+              analysisHTML = `
+                استقرار تام (<strong dir="ltr" class="font-mono text-cyber-cyan">0.00%</strong>)
+                بين ${baseShort} و ${cmpShort}
+                <span class="mx-1 text-slate-500">|</span>
+                <span dir="ltr" class="font-mono text-cyber-cyan font-bold">${formatNum(v1)}</span>
+                =
+                <span dir="ltr" class="font-mono text-cyber-cyan font-bold">${formatNum(vn)}</span>
+                <span class="mx-1 text-slate-500">|</span>
+                الفرق: <strong dir="ltr" class="font-mono text-cyber-cyan">0</strong>
+              `;
+            }
+          }
+        }
+
+        state.lastResultPercent[i] = purePercentForCopy;
+
+        resultsHTML.push(`
+          <article id="resultCard_${i}" class="cyber-card ${cardStatusClass} rounded-xl p-3 sm:p-4 text-center space-y-2">
+            <!-- عنوان المقارنة وزر نسخ النتيجة الصافية -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 min-w-0 text-right">
+                <span class="px-1.5 py-0.5 rounded bg-cyber-cyan/15 border border-cyber-cyan/35 text-cyber-cyan font-mono text-[10px] font-bold shrink-0">
+                  V1 ➔ V${vNum}
+                </span>
+                <span class="text-[11px] sm:text-xs font-bold text-slate-200 truncate">
+                  مقارنة ${baseLabel} ➔ ${cmpLabel}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                id="copyResultBtn_${i}"
+                onclick="copyComparisonResult(${i})"
+                class="shrink-0 px-2.5 sm:px-3 py-1 rounded-lg bg-cyber-cyan/15 hover:bg-cyber-cyan/25 active:scale-95 border border-cyber-cyan/40 text-cyber-cyan text-[11px] font-bold transition cursor-pointer"
+                title="نسخ الرقم الصافي فقط بدون علامة % أو إشارة"
+              >
+                نسخ النتيجة
+              </button>
+            </div>
+
+            <!-- النسبة المئوية بخط عريض وواضح -->
+            <div
+              dir="ltr"
+              class="font-mono text-3xl sm:text-5xl font-extrabold tracking-tight ${percentGlowClass} leading-none py-0.5 select-all"
+            >
+              ${percentDisplay}
+            </div>
+
+            <!-- النص التوضيحي التحليلي للمقارنة -->
+            <div class="rounded-lg bg-[#060913]/95 border border-cyber-cyan/25 py-2 px-3 text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+              ${analysisHTML}
+            </div>
+          </article>
+        `);
+      }
+
+      els.resultsList.innerHTML = resultsHTML.join('');
+    }
+
+    // نسخ الناتج الفعلي الصافي الخاص بكل بطاقة (V1, V2, V3...)
+    function copyEffectiveValue(idx) {
+      const pureVal = state.lastEffectivePure[idx] ?? '0';
+      const btn = document.getElementById(`copyEffBtn_${idx}`);
+
+      copyTextToClipboard(pureVal, () => {
+        if (btn) {
+          clearTimeout(btn._copyTimer);
+          const originalHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>نسخ</span>
+          `;
+          btn.innerHTML = '<span class="text-emerald-300">✓</span>';
+          btn._copyTimer = setTimeout(() => {
+            btn.innerHTML = originalHTML;
+          }, 1200);
+        }
+        showToast(`تم نسخ الفعلي (V${idx + 1}): ${pureVal} ✓`, 1500);
+      });
+    }
+
+    // نسخ النسبة المئوية الصافية لبطاقة نتيجة محددة (بدون % أو + أو -)
+    function copyComparisonResult(idx) {
+      const cleanNumber = state.lastResultPercent[idx] ?? '0.00';
+      const btn = document.getElementById(`copyResultBtn_${idx}`);
+
+      copyTextToClipboard(cleanNumber, () => {
+        if (btn) {
+          clearTimeout(btn._copyTimer);
+          btn.textContent = `تم نسخ: ${cleanNumber} ✓`;
+          btn._copyTimer = setTimeout(() => {
+            btn.textContent = 'نسخ النتيجة';
+          }, 1400);
+        }
+        showToast(`تم نسخ النسبة الصافية: ${cleanNumber} ✓`, 1400);
+      });
+    }
+
+    // ==========================================
+    // إعداد تطبيق الويب التقدمي (PWA: Manifest + Icon + Service Worker + Install Prompt)
+    // ==========================================
+    let deferredInstallPrompt = null;
+
+    function createCyberIconDataURL(size = 512) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, size, size);
+      bgGrad.addColorStop(0, '#050811');
+      bgGrad.addColorStop(1, '#101b33');
+      ctx.fillStyle = bgGrad;
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(0, 0, size, size, size * 0.22);
+        ctx.fill();
+      } else {
+        ctx.fillRect(0, 0, size, size);
+      }
+
+      ctx.strokeStyle = '#00f2fe';
+      ctx.lineWidth = size * 0.04;
+      ctx.shadowColor = '#00f2fe';
+      ctx.shadowBlur = size * 0.06;
+      ctx.strokeRect(size * 0.08, size * 0.08, size * 0.84, size * 0.84);
+
+      ctx.fillStyle = '#00f2fe';
+      ctx.font = `900 ${Math.round(size * 0.42)}px "JetBrains Mono", monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('%', size * 0.5, size * 0.46);
+
+      ctx.fillStyle = '#00ff9d';
+      ctx.font = `800 ${Math.round(size * 0.14)}px "JetBrains Mono", sans-serif`;
+      ctx.fillText('V1 ➔ Vn', size * 0.5, size * 0.78);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    function setupPWA() {
+      try {
+        const icon192 = createCyberIconDataURL(192);
+        const icon512 = createCyberIconDataURL(512);
+
+        const appleTouch = document.createElement('link');
+        appleTouch.rel = 'apple-touch-icon';
+        appleTouch.href = icon192;
+        document.head.appendChild(appleTouch);
+
+        const favIcon = document.createElement('link');
+        favIcon.rel = 'icon';
+        favIcon.type = 'image/png';
+        favIcon.href = icon192;
+        document.head.appendChild(favIcon);
+
+        const manifestObj = {
+          name: 'نسبة التغير | الحاسبة الذكية',
+          short_name: 'حاسبة التغير',
+          description: 'حاسبة ذكية لحساب ومقارنة نسبة التغير والفرق المئوي لعدة منصات ومنتجات مع المصارفة الفورية',
+          lang: 'ar',
+          dir: 'rtl',
+          start_url: window.location.href,
+          scope: './',
+          display: 'standalone',
+          orientation: 'portrait',
+          background_color: '#050811',
+          theme_color: '#050811',
+          icons: [
+            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestURL;
+        document.head.appendChild(manifestLink);
+
+        if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+          const swCode = `
+            const CACHE_NAME = 'smart-neon-calc-offline-v4';
+            const ASSETS = [
+              location.href,
+              'https://cdn.tailwindcss.com',
+              'https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap'
+            ];
+            self.addEventListener('install', (e) => {
+              e.waitUntil(
+                caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+              );
+              self.skipWaiting();
+            });
+            self.addEventListener('activate', (e) => {
+              e.waitUntil(
+                caches.keys().then((keys) => Promise.all(
+                  keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+                )).then(() => self.clients.claim())
+              );
+            });
+            self.addEventListener('fetch', (e) => {
+              e.respondWith(
+                caches.match(e.request).then((cached) => {
+                  const networkFetch = fetch(e.request).then((response) => {
+                    if (response && response.status === 200) {
+                      const clone = response.clone();
+                      caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone)).catch(() => {});
+                    }
+                    return response;
+                  }).catch(() => cached);
+                  return cached || networkFetch;
+                })
+              );
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+      } catch (e) {}
+
+      const updateOnlineBadge = () => {
+        const badge = document.getElementById('offlineStatusBadge');
+        if (!badge) return;
+        if (navigator.onLine) {
+          badge.textContent = 'جاهز بدون نت ✓';
+          badge.className = 'shrink-0 px-1.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[9px] font-bold';
+        } else {
+          badge.textContent = 'وضع بدون إنترنت 📴';
+          badge.className = 'shrink-0 px-1.5 py-0.5 rounded-full bg-cyber-cyan/20 border border-cyber-cyan/50 text-cyber-cyan text-[9px] font-bold';
+        }
+      };
+      window.addEventListener('online', updateOnlineBadge);
+      window.addEventListener('offline', updateOnlineBadge);
+      updateOnlineBadge();
+
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (isStandalone) {
+        const btn = document.getElementById('installAppBtn');
+        if (btn) btn.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btnText = document.getElementById('installBtnText');
+      if (btnText) btnText.textContent = 'تثبيت الآن 📲';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      showToast('تم تثبيت التطبيق للعمل بدون إنترنت ✓', 2500);
+      const btn = document.getElementById('installAppBtn');
+      if (btn) btn.classList.add('hidden');
+    });
+
+    async function triggerInstallApp() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredInstallPrompt = null;
+          showToast('جاري تثبيت التطبيق للعمل بدون إنترنت ✓', 2000);
+        }
+        return;
+      }
+
+      const modal = document.getElementById('installModal');
+      const body = document.getElementById('installModalBody');
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+      let stepsHTML = '';
+      if (isIOS) {
+        stepsHTML += `
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px]">
+            <strong>تثبيت التطبيق على آيفون للعمل بدون إنترنت:</strong>
+          </div>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-200">
+            <li>اضغط على زر <strong>المشاركة (Share)</strong> في أسفل متصفح Safari.</li>
+            <li>اختر <strong>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen)</strong>.</li>
+            <li>اضغط <strong>إضافة (Add)</strong> لتثبيت الحاسبة كتطبيق مستقل يعمل بدون إنترنت.</li>
+          </ol>
+        `;
+      } else {
+        stepsHTML += `
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px]">
+            <strong>تثبيت التطبيق في الهاتف للعمل بدون إنترنت:</strong>
+          </div>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-200">
+            <li>افتح قائمة المتصفح العلوية <span class="text-cyber-cyan font-bold">(⋮)</span>.</li>
+            <li>اختر <strong>"تثبيت التطبيق" (Install App)</strong> أو <strong>"الإضافة إلى الشاشة الرئيسية"</strong>.</li>
+            <li>سيتم تثبيت الحاسبة مباشرة كأيقونة تطبيق على شاشة هاتفك وتعمل بدون إنترنت.</li>
+          </ol>
+        `;
+      }
+
+      body.innerHTML = stepsHTML;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeInstallModal() {
+      const modal = document.getElementById('installModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // التشغيل الأولي للتطبيق
+    setupPWA();
+    loadSavedSettings();
+  </script>
+</body>
+</html>
